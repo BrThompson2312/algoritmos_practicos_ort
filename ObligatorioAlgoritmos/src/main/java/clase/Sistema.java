@@ -1,35 +1,37 @@
-package src.clases;
+package clase;
 
-import src.tadlista.ListaNodos;
-import src.tadlista.Nodo;
-import src.clases.Evento;
-import src.clases.Sala;
-import src.clases.Cliente;
+import tadlista.ListaNodos;
+import tadlista.Nodo;
+import clase.Evento;
+import clase.Sala;
+import clase.Cliente;
 
 import java.time.LocalDate;
 
 public class Sistema {
 
-    public ListadoNodos<Evento> listadoEventos;
-    public Listadonodos<Sala> listadoSalas;
-    public ListadoNodos<Cliente> listadoClientes;
-    public String[] reportes;
+    public ListaNodos<Evento> listadoEventos;
+    public ListaNodos<Sala> listadoSalas;
+    public ListaNodos<Cliente> listadoClientes;
 
-    public Sistema() {
-        this.listadoEventos = new ListaNodos();
-        this.listadoSalas = new ListaNodos();
-        this.listadoClientes = new ListadoNodos();
-    }
-
-    public Retorno crearSistemaDeGestion() {
-        Retorno retorno = new Retorno();
-        return null;
-
+    public Retorno.Resultado crearSistemaDeGestion() {
+ 
+        Retorno.Resultado resultado = Retorno.Resultado.NO_IMPLEMENTADA;
+        
         try {
-
-        } catch (exception e) {
+            
+            this.listadoEventos = new ListaNodos();
+            this.listadoSalas = new ListaNodos();
+            this.listadoClientes = new ListaNodos();
+            
+        } catch (Exception e) {
+            
+            throw new Error("Error");
             
         }
+        
+        return resultado;
+        
     }
 
     public Retorno registrarSala(String nombre, int capacidad) {

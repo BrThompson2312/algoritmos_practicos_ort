@@ -1,6 +1,4 @@
-
-package src.tadlista;
-
+package tadlista;
 
 public class Nodo<T> {
     

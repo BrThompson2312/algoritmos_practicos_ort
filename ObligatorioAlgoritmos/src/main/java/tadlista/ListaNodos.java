@@ -1,4 +1,4 @@
-package src.tadlista;
+package tadlista;
 
 public class ListaNodos<T> implements IListaSimple<T> {
 

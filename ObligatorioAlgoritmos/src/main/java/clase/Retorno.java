@@ -1,4 +1,4 @@
-package src.clases;
+package clase;
 
 public class Retorno {
     public enum Resultado{
