@@ -1,19 +1,16 @@
 package dominio;
 
 import tads.ListaNodos;
-import tads.Nodo;
-import dominio.Entrada;
 
 public class Cliente implements Comparable<Cliente> 
 {
     private String cedula;
     private String nombre;
-    private ListaNodos<Evento> listadoEventosComprados;
+    private ListaNodos<Evento> listadoEventosComprados = new ListaNodos<Evento>();
     
     public Cliente(String cedula, String nombre) {
         this.cedula = cedula;
         this.nombre = nombre;
-        this.listadoEventosComprados = new ListaNodos<Evento>();
     }
     
     public void setCedula(String cedula) {
@@ -44,4 +41,17 @@ public class Cliente implements Comparable<Cliente>
     public int compareTo(Cliente o) {
         return this.getCedula().compareTo(o.getCedula());
     }
+    
+    @Override
+    public String toString() {
+        return this.cedula + "-" + this.nombre;
+    }
+    
+    public static boolean cedulaValida(String cedula) {
+        if (cedula.length() != 8) {
+            return false;
+        }
+        return true;
+    }
+    
 }

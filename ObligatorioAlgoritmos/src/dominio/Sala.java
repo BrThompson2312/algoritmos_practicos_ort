@@ -1,23 +1,21 @@
 package dominio;
 
-import tads.Nodo;
 import java.time.LocalDate;
 import tads.ListaNodos;
 
-public class Sala implements Comparable<Evento> 
+public class Sala implements Comparable<Sala>
 {
-    private ListaNodos<LocalDate> fechaOcupada;
+    private ListaNodos<LocalDate> fechaOcupada = new ListaNodos<LocalDate>();
     private String nombre;
     private int capacidad;
     
     public Sala(String nombre, int capacidad) {
-        this.fechaOcupada = new ListaNodos<LocalDate>(); 
         this.nombre = nombre;
         this.capacidad = capacidad;
     }
     
-    public void setFechaOcupada(ListaNodos<LocalDate> fechaOcupada) {
-        this.fechaOcupada = fechaOcupada;
+    public void setFechaOcupada(LocalDate fechaOcupada) {
+        this.fechaOcupada.agregarInicio(fechaOcupada);
     }
 
     public void setNombre(String nombre) {
@@ -41,7 +39,12 @@ public class Sala implements Comparable<Evento>
     }
 
     @Override
-    public int compareTo(Evento o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public int compareTo(Sala o) {
+        return this.getNombre().compareTo(o.getNombre());
+    }
+    
+    @Override
+    public String toString() {
+        return this.nombre + "-" + this.capacidad;
     }
 }

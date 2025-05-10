@@ -1,30 +1,23 @@
 package dominio;
 
 import tads.ListaNodos;
-import tads.Nodo;
 import dominio.Entrada;
-import java.time.LocalDate;
 
 public class Evento implements Comparable<Evento> 
 {
     private String codigo;
     private String descripcion;
     private int puntaje = 0;
-    private Sala Sala;
-    private int entradasDisponibles;
-    private int entradasVendidas;
-    private ListaNodos<Cliente> listadoEsperaClientes;
-    private ListaNodos<Entrada> listadoEntradas;
+    private Sala sala;
+    private int entradasDisponibles = 0;
+    private int entradasVendidas = 0;
+    private ListaNodos<Cliente> listadoEsperaClientes = new ListaNodos<Cliente>();
+    private ListaNodos<Entrada> listadoEntradas = new ListaNodos<Entrada>();;
     
     public Evento(String codigo, String descripcion, Sala sala) {
         this.codigo = codigo;
         this.descripcion = descripcion;
-        this.Sala = sala;
-        
-        this.entradasDisponibles = 0;
-        this.entradasVendidas = 0;
-        this.listadoEsperaClientes = new ListaNodos<Cliente>();
-        this.listadoEntradas = new ListaNodos<Entrada>();
+        this.sala = sala;
     }
     
     public Evento(String codigo) {
@@ -44,7 +37,7 @@ public class Evento implements Comparable<Evento>
     }
 
     public Sala getSala() {
-        return Sala;
+        return sala;
     }
 
     public int getEntradasDisponibles() {
@@ -76,7 +69,7 @@ public class Evento implements Comparable<Evento>
     }
 
     public void setSala(Sala Sala) {
-        this.Sala = Sala;
+        this.sala = Sala;
     }
 
     public void setEntradasDisponibles(int entradasDisponibles) {
@@ -98,5 +91,14 @@ public class Evento implements Comparable<Evento>
     @Override
     public int compareTo(Evento o) {
         return this.getCodigo().compareTo(o.getCodigo());
+    }
+    
+    @Override
+    public String toString() {
+        return this.codigo + "-" 
+            + this.descripcion + "-" 
+            + this.sala + "-" 
+            + this.entradasDisponibles + "-" 
+            + this.entradasVendidas;
     }
 }

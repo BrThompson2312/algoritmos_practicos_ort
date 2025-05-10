@@ -1,6 +1,5 @@
 package dominio;
 
-import tads.Nodo;
 import dominio.Evento;
 
 public class Entrada implements Comparable<Entrada> 

@@ -24,10 +24,6 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
             inicio = nuevo;
             cantElementos++;
         }
-        
-        nuevo.setSiguiente(inicio);
-        inicio = nuevo;
-        cantElementos++;
     }
 
     @Override
@@ -37,6 +33,19 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
             System.out.print(aux.getDato() + " - ");
             aux = aux.getSiguiente();
         }
+    }
+    
+    // Nuevo metodo
+    public void mostrarInverso() {
+        
+        int indiceActual = cantElementos;
+        Nodo auxNodo = (Nodo)obtenerElemento(indiceActual);
+        
+        while (auxNodo != null && indiceActual != 0) {
+            System.out.print(auxNodo.getDato() + " - ");
+            indiceActual--;
+        }
+        
     }
 
     @Override
@@ -103,14 +112,9 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
             Nodo<T> nuevo = new Nodo(x);
             fin.setSiguiente(nuevo);
             fin = nuevo;
-            /*Nodo<T> aux = inicio;
-            while (aux.getSiguiente() != null) {
-                aux = aux.getSiguiente();
-            }
-            aux.setSiguiente(nuevo);*/
             cantElementos++;
         }
-    }
+    } 
 
     @Override
     public void eliminarInicio() {
@@ -125,7 +129,7 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
             }
         }
     }
-
+ 
     @Override
     public void eliminarFinal() {
         if (!esVacia()) {
@@ -189,7 +193,16 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
     
     @Override
     public void eliminarEnPos(int pos) {
-        
+        if (pos == 1) {
+            inicio = inicio.getSiguiente();
+        } else {
+            Nodo actual = inicio;
+            for (int i = 1; i < pos - 1; i++) {
+                actual = actual.getSiguiente();
+            }
+            actual.setSiguiente(actual.getSiguiente().getSiguiente());
+        }
+        cantElementos--;
     }
     
     public void agregarOrdenado(T x) {
@@ -209,4 +222,27 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
             }
         }
     }
+    
+    // Nuevo metodo
+    public void eliminarElemento(T x) {
+            
+        if (existeElemento(x)) {
+
+            int indiceActual = 1;
+
+            Nodo auxNodo = inicio;
+            boolean encontrado = false;
+
+            while (auxNodo != null && !encontrado) {
+                if (auxNodo.equals(x)) {
+                    eliminarEnPos(indiceActual);
+                    encontrado = true;
+                } else {
+                    auxNodo = auxNodo.getSiguiente();
+                    indiceActual++;
+                }
+            }
+        }
+    }
+    
 }

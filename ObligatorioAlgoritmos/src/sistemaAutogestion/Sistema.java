@@ -25,89 +25,124 @@ public class Sistema implements IObligatorio {
     // 1.2
     @Override
     public Retorno registrarSala(String nombre, int capacidad) {
-        Sala sAux = new Sala(nombre, capacidad);
-        if (listaSalas.getCantElementos() == 0) {
+        
+        if (capacidad <= 0) {
             return Retorno.error2();
-        } else {
-            if (!listaSalas.existeElemento(sAux)) {
-                listaSalas.agregarFinal(sAux);
-                return Retorno.ok("Si pudo registrar la sala");
-            } else {
-                return Retorno.error1();
-            }
         }
+        
+        Sala sAux = new Sala(nombre, capacidad);
+        
+        if (!listaSalas.existeElemento(sAux)) {
+            listaSalas.agregarInicio(sAux);
+            return Retorno.ok("Si pudo registrar la sala");
+        }
+        
+        return Retorno.error1();
     }
 
     // 1.3
     @Override
     public Retorno eliminarSala(String nombre) {
-        return Retorno.noImplementada();
+        
+        Nodo auxNodo = listaSalas.getInicio();
+        Sala auxSala = (Sala)auxNodo.getDato();
+        boolean encontrado = false;
+        
+        while (auxSala != null && !encontrado) {
+            if (auxSala.getNombre() == nombre) {
+                listaSalas.eliminarElemento(auxSala);
+                encontrado = true;
+            } else {
+                auxNodo = auxNodo.getSiguiente();
+            }
+        }
+        
+        if (encontrado) {
+            return Retorno.ok("Si pudo eliminar la sala");
+        }
+        return Retorno.error1();
     }
 
     // 1.4
     @Override
     public Retorno registrarEvento(String codigo, String descripcion, int aforoNecesario, LocalDate fecha) {
         
-        /*if (listaEventos.existeElemento(auxEvento)) {
-            return Retorno.error1();
-        } else {
-            if (aforoNecesario <= 0) {
-                return Retorno.error2();
-            } else {
-            
-                Sala auxSala = new Sala("Prueba", aforoNecesario);
-            
-                if (listaSalas.esVacia()) {
-                    return Retorno.error3();
-                } else {
-                    boolean existe = false;
-                    Nodo auxSala = listaSalas.getInicio();
-                
-                    while(auxSala != null && !existe) {
-                        if (listaSalas.getInicio().getDato().getCapacidad() >= aforoNecesario) {
-
-                        }
-                    }
-                }
-                Evento auxEvento = new Evento(codigo, descripcion, auxSala);
-                if (!listaEventos.existeElemento(auxEvento)) {
-                    listaEventos.agregarFinal(auxEvento);
-                    return Retorno.ok();
-                } else {
-                    return Retorno.error1();
-                }
-            }
-        }*/
+        if (aforoNecesario <= 0) {
+            return Retorno.error2();
+        }
         
         Evento auxEvento = new Evento(codigo);
-        if (!listaEventos.existeElemento(auxEvento)) {
-            if (aforoNecesario != 0 && aforoNecesario > 0) {
-                
-                Nodo auxSala = listaSalas.getInicio();
-                boolean salaDisponible = false;
-                
-                Sala auxSala2 = listaSalas.getInicio().getDato(); 
-                while (auxSala != null && !salaDisponible) {
-                    if (auxSala2.getCapacidad() >= aforoNecesario) {
-                        
-                    }
-                }
-            }
+        
+        if (listaEventos.existeElemento(auxEvento)) {
             return Retorno.error1();
         }
-        return Retorno.error1();
+            
+        if (!listaSalas.esVacia()) {
+            
+            Nodo auxNodoSala = listaSalas.getInicio();
+            Sala auxSala = (Sala)auxNodoSala.getDato();
+            boolean encontrado = false;
+
+            while (auxSala != null && !encontrado) {
+                if (auxSala.getCapacidad() >= aforoNecesario) {
+
+                    if (auxSala.getFechaOcupada().esVacia()) {
+                        
+                        LocalDate nuevaFecha = LocalDate.now();
+                        auxSala.setFechaOcupada(nuevaFecha);
+                        
+                    } else {
+                        
+                        Nodo auxNodoFecha = auxSala.getFechaOcupada().getInicio();
+                        LocalDate auxFecha = (LocalDate)auxNodoFecha.getDato();
+                        
+                        while (auxFecha != null && !encontrado) {
+                            if (
+                                auxFecha.getDayOfMonth() >= 1 && auxFecha.getDayOfMonth() <= 30
+                                && auxFecha.getMonthValue() >= 1 && auxFecha.getMonthValue() <= 12
+                            ){
+                                encontrado = true;
+                            } else {
+                                auxNodoFecha = auxNodoFecha.getSiguiente();
+                            }
+                        }
+                    }
+                    
+                } else {
+                    auxNodoSala = auxNodoSala.getSiguiente();
+                }
+            }
+
+            if (encontrado) {
+                auxEvento.setDescripcion(descripcion);
+                auxEvento.setSala(auxSala);
+                listaEventos.agregarInicio(auxEvento);
+                return Retorno.ok("Si pudo registrar el evento");
+            } else {
+                return Retorno.error3();
+            }
+            
+        } else {
+            return Retorno.error3();
+        }
     }
 
+    // 1.5
     @Override
     public Retorno registrarCliente(String cedula, String nombre) {
-        /*Cliente cAux = new Cliente();
-        cAux.setCedula(cedula);
         
-        if (!listaClientes.existeElemento(cAux)) {
-            Cliente c = new Cliente();
-            listaClientes.agregarFinal(c);
-        }*/
-        return Retorno.noImplementada();
+        if (!Cliente.cedulaValida(cedula)) {
+            return Retorno.error1();
+        }
+        
+        Cliente auxCliente = new Cliente(cedula, nombre);
+        
+        if (!listaClientes.existeElemento(auxCliente)) {
+            listaClientes.agregarInicio(auxCliente);
+            return Retorno.ok("Si pudo registrar el cliente");
+        }
+        
+        return Retorno.error2();
     }
 
     @Override
@@ -130,21 +165,39 @@ public class Sistema implements IObligatorio {
         return Retorno.noImplementada();
     }
 
+    // 2.1
     @Override
     public Retorno listarSalas() {
-        return Retorno.noImplementada();
+        listaSalas.mostrarInverso();
+        return Retorno.ok();
     }
 
+    // 2.2
     @Override
     public Retorno listarEventos() {
-        return Retorno.noImplementada();
+        ListaNodos<Cliente> listaEventosOrdenados = new ListaNodos<Cliente>();
+        
+        Nodo auxNodo = listaClientes.getInicio();
+        Cliente auxCliente = (Cliente)auxNodo.getDato();
+        
+        while (auxCliente != null) {
+            listaEventosOrdenados.agregarOrdenado(auxCliente);
+            auxNodo = auxNodo.getSiguiente();
+        }
+        
+        listaEventosOrdenados.mostrar();
+        
+        return Retorno.ok();
     }
 
+    // 2.3
     @Override
     public Retorno listarClientes() {
-        return Retorno.noImplementada();
+        listaClientes.mostrar();
+        return Retorno.ok();
     }
 
+    // 2.4
     @Override
     public Retorno esSalaOptima(String[][] vistaSala) {
         return Retorno.noImplementada();
