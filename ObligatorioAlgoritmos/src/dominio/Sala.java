@@ -37,10 +37,16 @@ public class Sala implements Comparable<Sala>
     public int getCapacidad() {
         return capacidad;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        Sala auxSala = (Sala)o;
+        return this.nombre == auxSala.nombre;
+    }
 
     @Override
     public int compareTo(Sala o) {
-        return this.getNombre().compareTo(o.getNombre());
+        return this.nombre.compareTo(o.nombre);
     }
     
     @Override

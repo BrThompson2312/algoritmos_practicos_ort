@@ -89,6 +89,12 @@ public class Evento implements Comparable<Evento>
     }
     
     @Override
+    public boolean equals(Object o) {
+        Evento auxEvento = (Evento)o;
+        return this.codigo == auxEvento.codigo;
+    }
+    
+    @Override
     public int compareTo(Evento o) {
         return this.getCodigo().compareTo(o.getCodigo());
     }

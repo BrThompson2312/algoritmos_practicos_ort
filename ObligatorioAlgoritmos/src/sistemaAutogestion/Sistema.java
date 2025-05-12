@@ -83,7 +83,7 @@ public class Sistema implements IObligatorio {
             Sala auxSala = (Sala)auxNodoSala.getDato();
             boolean encontrado = false;
 
-            while (auxSala != null && !encontrado) {
+            while (auxNodoSala != null && !encontrado) {
                 if (auxSala.getCapacidad() >= aforoNecesario) {
 
                     if (auxSala.getFechaOcupada().esVacia()) {
@@ -166,14 +166,33 @@ public class Sistema implements IObligatorio {
     }
 
     // 2.1
-    @Override
+    /*@Override
     public Retorno listarSalas() {
         listaSalas.mostrarInverso();
         return Retorno.ok();
+    }*/
+    
+    // 2.1
+    @Override
+    public Retorno listarSalas() {
+        Retorno r = new Retorno(Retorno.Resultado.OK);
+        
+        String texto = "";
+        for (int i = 0; i <= listaSalas.cantidadElementos(); i++) {
+            Sala s = listaSalas.obtenerElemento(i);
+            texto += s.toString() + "#";
+        }
+        
+        // Elimino ultimo "#"
+        texto = texto.substring(0, texto.length() - 1);
+        
+        r.valorString = texto;
+        
+        return r;
     }
 
     // 2.2
-    @Override
+    /*@Override
     public Retorno listarEventos() {
         ListaNodos<Cliente> listaEventosOrdenados = new ListaNodos<Cliente>();
         
@@ -188,13 +207,58 @@ public class Sistema implements IObligatorio {
         listaEventosOrdenados.mostrar();
         
         return Retorno.ok();
+    }*/
+    
+    // 2.2
+    @Override
+    public Retorno listarEventos() {
+        Retorno r = new Retorno(Retorno.Resultado.OK);
+        
+        ListaNodos<Evento> listadoEventos = new ListaNodos<Evento>();
+        
+        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
+            Evento auxEvento = listaEventos.obtenerElemento(i);
+            listaEventos.agregarOrdenado(auxEvento);
+        }
+        
+        String texto = "";
+        for (int i = 0; i <= listadoEventos.cantidadElementos(); i++) {
+            Evento auxEvento = listadoEventos.obtenerElemento(i);
+            texto += auxEvento.toString() + "#";
+        }
+        
+        // Elimino ultimo "#"
+        texto = texto.substring(0, texto.length() - 1);
+        
+        r.valorString = texto;
+        
+        return r;
     }
 
     // 2.3
     @Override
     public Retorno listarClientes() {
-        listaClientes.mostrar();
-        return Retorno.ok();
+        Retorno r = new Retorno(Retorno.Resultado.OK);
+        
+        ListaNodos<Cliente> auxListaClientes = new ListaNodos<Cliente>();
+        
+        for (int i = 0; i <= listaClientes.cantidadElementos(); i++) {
+            Cliente auxCliente = listaClientes.obtenerElemento(i);
+            auxListaClientes.agregarOrdenado(auxCliente);
+        }
+        
+        String texto = "";
+        for (int i = 0; i <= auxListaClientes.cantidadElementos(); i++) {
+            Cliente auxCliente = auxListaClientes.obtenerElemento(i);
+            texto += auxCliente.toString() + "#";
+        }
+        
+        // Elimino ultimo "#"
+        texto = texto.substring(0, texto.length() - 1);
+        
+        r.valorString = texto;
+        
+        return r;
     }
 
     // 2.4

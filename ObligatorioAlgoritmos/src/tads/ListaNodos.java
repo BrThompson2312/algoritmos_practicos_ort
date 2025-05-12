@@ -50,15 +50,6 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
 
     @Override
     public int cantidadElementos() {
-        /*
-        int cant = 0;
-        Nodo aux = inicio;
-
-        while (aux != null) {
-            cant++;
-            aux = aux.getSiguiente();
-        }
-        return cant;*/
         return cantElementos;
     }
 

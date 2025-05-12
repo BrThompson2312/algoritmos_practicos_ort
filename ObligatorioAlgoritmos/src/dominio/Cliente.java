@@ -36,10 +36,16 @@ public class Cliente implements Comparable<Cliente>
     public ListaNodos<Evento> getListadoEventosComprados() {
         return listadoEventosComprados;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        Cliente auxCliente = (Cliente)o;
+        return this.cedula == auxCliente.cedula;
+    }
 
     @Override
     public int compareTo(Cliente o) {
-        return this.getCedula().compareTo(o.getCedula());
+        return this.cedula.compareTo(o.cedula);
     }
     
     @Override
