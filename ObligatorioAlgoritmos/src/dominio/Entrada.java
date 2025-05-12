@@ -40,6 +40,6 @@ public class Entrada implements Comparable<Entrada>
 
     @Override
     public int compareTo(Entrada o) {
-        return this.getCodigo().compareTo(o.getCodigo());
+        return this.codigo.compareTo(o.codigo);
     }
 }

@@ -12,7 +12,7 @@ public class Evento implements Comparable<Evento>
     private int entradasDisponibles = 0;
     private int entradasVendidas = 0;
     private ListaNodos<Cliente> listadoEsperaClientes = new ListaNodos<Cliente>();
-    private ListaNodos<Entrada> listadoEntradas = new ListaNodos<Entrada>();;
+    private ListaNodos<Entrada> listadoEntradas = new ListaNodos<Entrada>();
     
     public Evento(String codigo, String descripcion, Sala sala) {
         this.codigo = codigo;
@@ -96,15 +96,11 @@ public class Evento implements Comparable<Evento>
     
     @Override
     public int compareTo(Evento o) {
-        return this.getCodigo().compareTo(o.getCodigo());
+        return this.codigo.compareTo(o.codigo);
     }
     
     @Override
     public String toString() {
-        return this.codigo + "-" 
-            + this.descripcion + "-" 
-            + this.sala + "-" 
-            + this.entradasDisponibles + "-" 
-            + this.entradasVendidas;
+        return this.codigo + "-" + this.descripcion + "-" + this.sala + "-" + this.entradasDisponibles + "-" + this.entradasVendidas;
     }
 }

@@ -79,37 +79,43 @@ public class Sistema implements IObligatorio {
             
         if (!listaSalas.esVacia()) {
             
-            Nodo auxNodoSala = listaSalas.getInicio();
-            Sala auxSala = (Sala)auxNodoSala.getDato();
+            int indiceActual = 0;
+            Sala auxSala = listaSalas.obtenerElemento(indiceActual);
             boolean encontrado = false;
 
-            while (auxNodoSala != null && !encontrado) {
+            while (auxSala != null && !encontrado) {
                 if (auxSala.getCapacidad() >= aforoNecesario) {
 
                     if (auxSala.getFechaOcupada().esVacia()) {
                         
-                        LocalDate nuevaFecha = LocalDate.now();
-                        auxSala.setFechaOcupada(nuevaFecha);
+                        auxSala.setFechaOcupada(fecha);
+                        encontrado = true;
                         
                     } else {
                         
                         Nodo auxNodoFecha = auxSala.getFechaOcupada().getInicio();
                         LocalDate auxFecha = (LocalDate)auxNodoFecha.getDato();
                         
-                        while (auxFecha != null && !encontrado) {
+                        while (auxNodoFecha != null && !encontrado) {
                             if (
-                                auxFecha.getDayOfMonth() >= 1 && auxFecha.getDayOfMonth() <= 30
+                                auxFecha == fecha
+                                && auxFecha.getDayOfMonth() >= 1 && auxFecha.getDayOfMonth() <= 30
                                 && auxFecha.getMonthValue() >= 1 && auxFecha.getMonthValue() <= 12
                             ){
+                                auxSala.setFechaOcupada(fecha);
                                 encontrado = true;
                             } else {
                                 auxNodoFecha = auxNodoFecha.getSiguiente();
                             }
                         }
+                        
+                        if (!encontrado) {
+                            auxSala = listaSalas.obtenerElemento(++indiceActual);
+                        }
                     }
                     
                 } else {
-                    auxNodoSala = auxNodoSala.getSiguiente();
+                    auxSala = listaSalas.obtenerElemento(++indiceActual);
                 }
             }
 
@@ -166,13 +172,6 @@ public class Sistema implements IObligatorio {
     }
 
     // 2.1
-    /*@Override
-    public Retorno listarSalas() {
-        listaSalas.mostrarInverso();
-        return Retorno.ok();
-    }*/
-    
-    // 2.1
     @Override
     public Retorno listarSalas() {
         Retorno r = new Retorno(Retorno.Resultado.OK);
@@ -192,44 +191,25 @@ public class Sistema implements IObligatorio {
     }
 
     // 2.2
-    /*@Override
-    public Retorno listarEventos() {
-        ListaNodos<Cliente> listaEventosOrdenados = new ListaNodos<Cliente>();
-        
-        Nodo auxNodo = listaClientes.getInicio();
-        Cliente auxCliente = (Cliente)auxNodo.getDato();
-        
-        while (auxCliente != null) {
-            listaEventosOrdenados.agregarOrdenado(auxCliente);
-            auxNodo = auxNodo.getSiguiente();
-        }
-        
-        listaEventosOrdenados.mostrar();
-        
-        return Retorno.ok();
-    }*/
-    
-    // 2.2
     @Override
     public Retorno listarEventos() {
         Retorno r = new Retorno(Retorno.Resultado.OK);
         
-        ListaNodos<Evento> listadoEventos = new ListaNodos<Evento>();
-        
+        ListaNodos<Evento> auxListaEventos = new ListaNodos<Evento>();
+
         for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
             Evento auxEvento = listaEventos.obtenerElemento(i);
-            listaEventos.agregarOrdenado(auxEvento);
+            auxListaEventos.agregarOrdenado(auxEvento);
         }
         
         String texto = "";
-        for (int i = 0; i <= listadoEventos.cantidadElementos(); i++) {
-            Evento auxEvento = listadoEventos.obtenerElemento(i);
+        for (int i = 0; i <= auxListaEventos.cantidadElementos(); i++) {
+            Evento auxEvento = auxListaEventos.obtenerElemento(i);
             texto += auxEvento.toString() + "#";
         }
         
         // Elimino ultimo "#"
         texto = texto.substring(0, texto.length() - 1);
-        
         r.valorString = texto;
         
         return r;
@@ -264,7 +244,47 @@ public class Sistema implements IObligatorio {
     // 2.4
     @Override
     public Retorno esSalaOptima(String[][] vistaSala) {
-        return Retorno.noImplementada();
+        
+        Retorno r = new Retorno(Retorno.Resultado.OK);
+        
+        int columnas = 0;
+        
+        for (int f = 0; f < vistaSala[0].length; f++) {
+            
+            int asientosLibres_X = 0;
+            int asientosOcupados_O = 0;
+            int consecutivos = 0;
+            int maxConsecutivos = 0;
+                
+            for (int c = 0; c < vistaSala.length; c++) {
+                
+                if (vistaSala[c][f].equals("O")) {
+                    asientosOcupados_O++;
+                    consecutivos++;
+                    
+                    if (consecutivos > maxConsecutivos) {
+                        maxConsecutivos = consecutivos;
+                    }
+                    
+                } else if (vistaSala[c][f].equals("X")) {
+                    asientosLibres_X++;
+                    consecutivos = 0;
+                }
+                
+            }
+            
+            if (maxConsecutivos >= asientosLibres_X) {
+                columnas++;
+            }
+        }
+        
+        if (columnas >= 2) {
+            r.valorString = "Es óptimo";
+        } else {
+            r.valorString = "No es óptimo";
+        }
+
+        return r;
     }
 
     @Override
