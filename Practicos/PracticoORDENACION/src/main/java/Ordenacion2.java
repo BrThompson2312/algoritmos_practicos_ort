@@ -14,8 +14,6 @@ public class Ordenacion2 {
         System.out.println(Arrays.toString(vec3));
     }
     
-    
-    
     public static void bubbleSort(int vec[]) 
     {
         int pasadas = 0;
@@ -121,6 +119,17 @@ public class Ordenacion2 {
             int aux = vec[i];
             vec[i] = vec[posMin];
             vec[posMin] = aux;
+        }
+    }
+    
+    public static void insertSort(int lista[]) {
+        for (int i = 1; i < lista.length; i++) {
+            int insert = lista[i];
+            int j = 1;
+            while (j >= 0 && insert < lista[j]) {
+                lista[j+1] = lista[j];
+            }
+            lista[j+1] = insert;
         }
     }
 }
