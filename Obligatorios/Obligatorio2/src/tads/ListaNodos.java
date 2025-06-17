@@ -198,7 +198,7 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
     
     public void agregarOrdenado(T x) {
         if (esVacia() || x.compareTo(inicio.getDato()) < 0) {
-            agregarFinal(x);
+            agregarInicio(x);
         } else {
             Nodo<T> act = inicio;
             while (act.getSiguiente() != null && act.getSiguiente().getDato().compareTo(x) <= 0) {

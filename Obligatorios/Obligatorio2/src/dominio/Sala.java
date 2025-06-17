@@ -41,7 +41,7 @@ public class Sala implements Comparable<Sala>
     @Override
     public boolean equals(Object o) {
         Sala auxSala = (Sala)o;
-        return this.nombre == auxSala.nombre;
+        return this.nombre.equals(auxSala.nombre);
     }
 
     @Override

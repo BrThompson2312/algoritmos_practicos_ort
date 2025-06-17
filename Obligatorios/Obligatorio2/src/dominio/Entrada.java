@@ -20,7 +20,7 @@ public class Entrada implements Comparable<Entrada>
     }
     
     public boolean estaActiva(){
-    return activa;
+        return activa;
     }
 
     public void setEntradaEvento(Evento entradaEvento) {

@@ -11,16 +11,17 @@ public class Evento implements Comparable<Evento>
     private int puntaje = 0;
     private double PromedioPuntaje = 0;
     private Sala sala;
-    private int entradasDisponibles = 0;
+    private int entradasDisponibles;
     private int entradasVendidas = 0;
     private ListaNodos<Cliente> listadoEsperaClientes = new ListaNodos<Cliente>();
     private ListaNodos<Entrada> listadoEntradas = new ListaNodos<Entrada>();
     private ListaNodos<Calificacion> calificaciones = new ListaNodos<>();
      
-    public Evento(String codigo, String descripcion, Sala sala) {
+    public Evento(String codigo, String descripcion, Sala sala, int entradasDisponibles) {
         this.codigo = codigo;
         this.descripcion = descripcion;
         this.sala = sala;
+        this.entradasDisponibles = entradasDisponibles;
     }
     
     public Evento(String codigo) {
@@ -95,22 +96,22 @@ public class Evento implements Comparable<Evento>
         this.entradasVendidas = entradasVendidas;
     }
 
-    public void setListadoEsperaClientes(ListaNodos<Cliente> listadoEsperaClientes) {
-        this.listadoEsperaClientes = listadoEsperaClientes;
+    public void setListadoEsperaClientes(Cliente cliente) {
+        this.listadoEsperaClientes.agregarInicio(cliente);
     }
 
-    public void setListadoEntradas(ListaNodos<Entrada> listadoEntradas) {
-        this.listadoEntradas = listadoEntradas;
+    public void setListadoEntradas(Entrada entrada) {
+        this.listadoEntradas.agregarInicio(entrada);
     }
     
-    public void setCalificaciones(ListaNodos<Calificacion> calificaciones) {
-    this.calificaciones = calificaciones;
+    public void setCalificaciones(Calificacion calificacion) {
+        this.calificaciones.agregarInicio(calificacion);
     }
     
     @Override
     public boolean equals(Object o) {
         Evento auxEvento = (Evento)o;
-        return this.codigo == auxEvento.codigo;
+        return this.codigo.equals(auxEvento.codigo);
     }
     
     @Override
@@ -123,4 +124,4 @@ public class Evento implements Comparable<Evento>
         return this.codigo + "-" + this.descripcion + "-" + this.sala + "-" + this.entradasDisponibles + "-" + this.entradasVendidas;
     }
 
-    }
+}

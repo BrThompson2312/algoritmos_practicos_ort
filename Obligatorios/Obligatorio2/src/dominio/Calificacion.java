@@ -1,8 +1,5 @@
-
 package dominio;
 import tads.ListaNodos;
-
-
         
 public class Calificacion implements Comparable <Calificacion> {
     private Cliente cliente;
@@ -10,51 +7,46 @@ public class Calificacion implements Comparable <Calificacion> {
     private String comentario;
     
     public Calificacion (Cliente cliente, int puntaje, String comentario) {
-    this.cliente = cliente;
-    this.puntaje = puntaje;
-    this.comentario = comentario;
+        this.cliente = cliente;
+        this.puntaje = puntaje;
+        this.comentario = comentario;
     }
     
     public Cliente getCliente(){
-    return cliente;
+        return cliente;
     }
     
     public int getPuntaje(){
-    return puntaje;
+        return puntaje;
     }
     
     public String getComentario(){
-    return comentario;
+        return comentario;
     }
-    
     
     public void setPuntaje(int puntaje){
-    this.puntaje = puntaje;
+        this.puntaje = puntaje;
     }
     
-    
     public void setComentario (String comentario) {
-    this.comentario = comentario;
+        this.comentario = comentario;
     }
     
     @Override
     public boolean equals (Object o) {
-    Calificacion otra = (Calificacion) o;
-    return this.cliente.getCedula().equals(otra.cliente.getCedula());
+        Calificacion otra = (Calificacion) o;
+        return this.cliente.getCedula().equals(otra.cliente.getCedula());
     }
-    
     
     @Override
     public int compareTo (Calificacion o) {
-    return this.cliente.getCedula().compareTo(o.cliente.getCedula());
+        return this.cliente.getCedula().compareTo(o.cliente.getCedula());
     }
-    
     
     @Override
     public String toString() {
-    return this.cliente.getCedula() + " - " + this.puntaje + " - " + this.comentario;
+        return this.cliente.getCedula() + " - " + this.puntaje + " - " + this.comentario;
     }
-    
     
 }
 
