@@ -13,6 +13,10 @@ public class Cliente implements Comparable<Cliente>
         this.nombre = nombre;
     }
     
+    public Cliente(String cedula) {
+        this.cedula = cedula;
+    }
+    
     public void setCedula(String cedula) {
         this.cedula = cedula;
     }
