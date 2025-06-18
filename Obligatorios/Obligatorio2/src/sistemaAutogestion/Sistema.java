@@ -10,9 +10,9 @@ import tads.ListaNodos;
 
 public class Sistema implements IObligatorio {
     
-    public ListaNodos<Evento> listaEventos;
-    public ListaNodos<Cliente> listaClientes;
-    public ListaNodos<Sala> listaSalas;
+    private ListaNodos<Evento> listaEventos;
+    private ListaNodos<Cliente> listaClientes;
+    private ListaNodos<Sala> listaSalas;
    
     // 1.1
     @Override
@@ -32,7 +32,6 @@ public class Sistema implements IObligatorio {
         }
         
         Sala sAux = new Sala(nombre, capacidad);
-        
         if (!listaSalas.existeElemento(sAux)) {
             listaSalas.agregarInicio(sAux);
             return Retorno.ok("Si pudo registrar la sala");
@@ -44,22 +43,28 @@ public class Sistema implements IObligatorio {
     // 1.3
     @Override
     public Retorno eliminarSala(String nombre) {
+        
+        if (listaSalas.esVacia()) {
+            return Retorno.error1();
+        }
+        
         int indice = 0;
         Sala auxSala = listaSalas.obtenerElemento(indice);
         boolean encontrado = false;
-        
         while (auxSala != null && !encontrado) {
-            if (auxSala.getNombre() == nombre) {
+            if (auxSala.getNombre().equals(nombre)) {
                 listaSalas.eliminarElemento(auxSala);
                 encontrado = true;
             } else {
                 indice++;
+                auxSala = listaSalas.obtenerElemento(indice);
             }
         }
         
         if (encontrado) {
             return Retorno.ok("Si pudo eliminar la sala");
         }
+        
         return Retorno.error1();
     }
 
@@ -234,58 +239,48 @@ public class Sistema implements IObligatorio {
     // 1.8
     @Override
     public Retorno devolverEntrada(String cedula, String codigoEvento) {
-        Cliente cliente = null;
-        boolean terminado = false;
-        for (int i = 0; i <= listaClientes.cantidadElementos() && !terminado; i++) {
-            Cliente c = listaClientes.obtenerElemento(i);
-            if (c != null) {
-                if (c.getCedula().equals(cedula)) {
-                    cliente = c;
-                }
-            } else {
-                terminado = true;
-            }
-        }
-        if (cliente == null) {
-            return Retorno.error1();
-        }
-
+        
         Evento evento = null;
-        terminado = false;
-        for (int i = 0; i <= listaEventos.cantidadElementos() && !terminado; i++) {
+        for (int i = 0; i < listaEventos.cantidadElementos() && evento == null; i++) {
             Evento e = listaEventos.obtenerElemento(i);
-            if (e != null) {
-                if (e.getCodigo().equals(codigoEvento)) {
-                    evento = e;
-                } 
-            } else {
-                terminado = true;
-            }
+            if (e.getCodigo().equals(codigoEvento)) {
+                evento = e;
+            } 
         }
         if (evento == null) {
             return Retorno.error2();
         }
         
+        if (evento.getListadoEntradas().esVacia()) {
+            return Retorno.error1();
+        }
         int indice = 0;
-        Entrada entrada = evento.getListadoEntradas().obtenerElemento(indice);
-        boolean encontrado = false;
-        
-        while (entrada != null && !encontrado) {
-            if (entrada.getEntradaCliente().getCedula().equals(cedula)) {
-                encontrado = true;
-
-                // Siempre y cuando la lista de espera no este vacia
-                if (evento.getListadoEsperaClientes().cantidadElementos() >= 1) {
-                    // Asignamos entrada al nuevo cliente
-                    entrada.setEntradaCliente(evento.getListadoEsperaClientes().getFin().getDato());
-
-                    // Eliminamos cliente de la lista de espera
-                    evento.getListadoEsperaClientes().eliminarElemento(cliente);
-                }
-                
+        Cliente cliente = evento.getListadoEntradas().obtenerElemento(indice).getEntradaCliente();
+        Entrada entrada = null;
+        boolean finalizado = false;
+        while (cliente != null && !finalizado) {
+            if (cliente.getCedula().equals(cedula)) {
+                entrada = evento.getListadoEntradas().obtenerElemento(indice);
+                finalizado = true;
             } else {
                 indice++;
+                Entrada entradaSiguiente = evento.getListadoEntradas().obtenerElemento(indice);
+                if (entradaSiguiente != null) {
+                    cliente =  entradaSiguiente.getEntradaCliente();
+                } else {
+                    finalizado = true;
+                }
             }
+        }
+        if (finalizado && entrada == null) {
+            return Retorno.error1();
+        }
+  
+        if (!evento.getListadoEsperaClientes().esVacia()) {
+            entrada.setEntradaCliente(evento.getListadoEsperaClientes().getFin().getDato());
+            evento.getListadoEsperaClientes().eliminarElemento(cliente);
+        } else {
+            entrada.setActiva(false);
         }
         
         return Retorno.ok();
@@ -373,8 +368,9 @@ public class Sistema implements IObligatorio {
             sala = listaSalas.obtenerElemento(indice);
         }
         
-        texto = texto.substring(0, texto.length() - 1);
-        
+        if (!texto.equals("")) {
+            texto = texto.substring(0, texto.length() - 1);
+        }
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = texto;
         return r;
@@ -399,6 +395,9 @@ public class Sistema implements IObligatorio {
             indice++;
         }
         
+        if (!texto.equals("")) {
+            texto = texto.substring(0, texto.length() - 1);
+        }
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = texto;
         return r;
@@ -407,7 +406,6 @@ public class Sistema implements IObligatorio {
     // 2.3
     @Override
     public Retorno listarClientes() {
-        
         String texto = "";
         ListaNodos<Cliente> auxListaClientes = new ListaNodos<Cliente>();
         
@@ -423,7 +421,9 @@ public class Sistema implements IObligatorio {
             indice++;
         }
         
-        texto = texto.substring(0, texto.length() - 1);
+        if (!texto.equals("")) {
+            texto = texto.substring(0, texto.length() - 1);
+        }
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = texto;
         return r;
@@ -446,11 +446,15 @@ public class Sistema implements IObligatorio {
                 
             for (int c = 0; c < vistaSala.length; c++) {
                 
+                if (vistaSala[c][f].equals("#")) {
+                    continue;
+                }
+                
                 if (vistaSala[c][f].equals("O")) {
                     asientosOcupados_O++;
                     consecutivos++;
                     
-                    if (consecutivos > maxConsecutivos) {
+                    if (consecutivos > 1) {
                         maxConsecutivos = consecutivos;
                     }
                     
@@ -461,7 +465,7 @@ public class Sistema implements IObligatorio {
                 
             }
             
-            if (maxConsecutivos >= asientosLibres_X) {
+            if (maxConsecutivos != 0 && maxConsecutivos >= asientosLibres_X) {
                 columnas++;
             }
         }
@@ -486,25 +490,20 @@ public class Sistema implements IObligatorio {
             return Retorno.error1();
         }
         Evento evento = null;
-        boolean terminado = false;
-        for (int i = 0; i <= listaEventos.cantidadElementos() && !terminado; i++) {
+        for (int i = 0; i < listaEventos.cantidadElementos() && evento == null; i++) {
             Evento e = listaEventos.obtenerElemento(i);
-            if (e != null) {
-                if (e.getCodigo().equals(codigo)) {
-                    evento = e;
-                }
-            } else {
-                terminado = true;
+            if (e.getCodigo().equals(codigo)) {
+                evento = e;
             }
         }
         if (evento == null) {
             return Retorno.error1();
         }
-
+        
         ListaNodos<Entrada> entradas = evento.getListadoEntradas();
         
         String resultado = "";
-        terminado = false;
+        boolean terminado = false;
         for (int i = 0; i < n && !terminado; i++) {
             Entrada entrada = entradas.obtenerElemento(i);
             if (entrada != null) {
@@ -531,15 +530,14 @@ public class Sistema implements IObligatorio {
     public Retorno listarEsperaEvento() {
         ListaNodos<Evento> eventosConEspera = new ListaNodos<>();
 
+        if (listaEventos.esVacia()) {
+            return Retorno.ok();
+        }
         boolean terminado = false;
         for (int i = 0; i < listaEventos.cantidadElementos() && !terminado; i++) {
             Evento evento = listaEventos.obtenerElemento(i);
-            if (evento != null) {
-                if (!evento.getListadoEsperaClientes().esVacia()) {
-                    eventosConEspera.agregarOrdenado(evento);
-                }
-            } else {
-                terminado = true;
+            if (!evento.getListadoEsperaClientes().esVacia()) {
+                eventosConEspera.agregarOrdenado(evento);
             }
         }
         
@@ -562,7 +560,10 @@ public class Sistema implements IObligatorio {
             }
             resultado += "#";
         }
-        resultado = resultado.substring(0, resultado.length() - 1);
+        
+        if (!resultado.equals("")) {
+            resultado = resultado.substring(0, resultado.length() - 1);
+        }
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = resultado;
         return r;
@@ -610,7 +611,9 @@ public class Sistema implements IObligatorio {
             resultado += descripciones.obtenerElemento(i) + "#";
         }
         
-        resultado = resultado.substring(0, resultado.length() - 1);
+        if (!resultado.equals("")) {
+            resultado = resultado.substring(0, resultado.length() - 1);
+        }
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = resultado;
         return r;
@@ -672,7 +675,9 @@ public class Sistema implements IObligatorio {
             auxEntrada = listadoEntradas.obtenerElemento(indice2);
         }
         
-        resultado = resultado.substring(0, resultado.length() - 1);
+        if (!resultado.equals("")) {
+            resultado = resultado.substring(0, resultado.length() - 1);
+        }
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = resultado;
         return r;
@@ -730,47 +735,47 @@ public class Sistema implements IObligatorio {
     @Override
     public Retorno comprasDeCliente(String cedula) {
         
-        if (listaClientes.esVacia()) {
-            return Retorno.error1();
-        }
-        
-        Cliente cliente = new Cliente(cedula);
-        if (!listaClientes.existeElemento(cliente)) {
-            return Retorno.error1();
-        }
-        
-        for (int i = 0; i <= listaClientes.cantidadElementos(); i++) {
-            Cliente c = listaClientes.obtenerElemento(i);
-            if (c.getCedula().equals(cedula)) {
-                cliente = c;
-            }
-        }
-
         String resultado = "";
-
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
+        for (int i = 0; i < listaEventos.cantidadElementos(); i++) {
+            
             Evento evento = listaEventos.obtenerElemento(i);
             ListaNodos<Entrada> entradas = evento.getListadoEntradas();
-
+            
             if (!entradas.esVacia()) {
-                for (int j = 0; j <= entradas.cantidadElementos(); j++) {
-                    Entrada entrada = entradas.obtenerElemento(j);
-
-                    if (entrada.getEntradaCliente().getCedula().equals(cedula)) {
-                        String estado = "";
-                        if (entrada.estaActiva()) {
-                            estado = "N";
-                        } else {
-                            estado = "D";
+                
+                int indice = 0;
+                Entrada entradaTemp = entradas.obtenerElemento(indice);
+                if (entradaTemp == null) {
+                    return Retorno.error1();
+                }
+                Cliente cliente = entradas.obtenerElemento(indice).getEntradaCliente();
+                Entrada entrada = null;
+                boolean encontrado = false;
+                while (cliente != null && !encontrado) {
+                    if (cliente.getCedula().equals(cedula)) {
+                        entrada = entradas.obtenerElemento(indice);
+                        encontrado = true;
+                    } else {
+                        indice++;
+                        Entrada entradaSiguiente = entradas.obtenerElemento(indice);
+                        if (entradaSiguiente == null) {
+                            return Retorno.error1();
                         }
-                        resultado += evento.getCodigo() + "-" + estado + "#";
+                        cliente = entradaSiguiente.getEntradaCliente();
                     }
                 }
+                
+                if (encontrado != false) {
+                    String estado = entrada.estaActiva() ? "N" : "D"; 
+                    resultado += evento.getCodigo() + "-" + estado + "#";
+                }
+                
             }
-            
         }
         
-        resultado = resultado.substring(0, resultado.length() - 1);
+        if (!resultado.equals("")) {
+            resultado = resultado.substring(0, resultado.length() - 1);
+        }
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = resultado;
         return r;
