@@ -94,6 +94,7 @@ public class Evento implements Comparable<Evento>
 
     public void setEntradasVendidas(int entradasVendidas) {
         this.entradasVendidas = entradasVendidas;
+        
     }
 
     public void setListadoEsperaClientes(Cliente cliente) {
@@ -102,6 +103,8 @@ public class Evento implements Comparable<Evento>
 
     public void setListadoEntradas(Entrada entrada) {
         this.listadoEntradas.agregarInicio(entrada);
+        this.entradasVendidas++;
+        this.entradasDisponibles--;
     }
     
     public void setCalificaciones(Calificacion calificacion) {

@@ -88,7 +88,6 @@ public class Sistema implements IObligatorio {
         int indiceActual = 0;
         Sala auxSala = listaSalas.obtenerElemento(indiceActual);
         boolean encontrado = false;
-
         while (auxSala != null && !encontrado) {
             
             if (auxSala.getCapacidad() >= aforoNecesario) {
@@ -103,12 +102,12 @@ public class Sistema implements IObligatorio {
                     int indiceFecha = 0;
                     LocalDate auxFechaOcupada = auxSala.getFechaOcupada().obtenerElemento(indiceFecha);
                     boolean finalizado = false;
-                    
                     while (auxFechaOcupada != null && !finalizado) {
                         if (auxFechaOcupada.equals(fecha)) {
                             finalizado = true;
                         } else {
-                            auxFechaOcupada = auxSala.getFechaOcupada().obtenerElemento(indiceFecha++);
+                            indiceFecha++;
+                            auxFechaOcupada = auxSala.getFechaOcupada().obtenerElemento(indiceFecha);
                         }
                     }
                     
@@ -198,7 +197,6 @@ public class Sistema implements IObligatorio {
         if (evento.getEntradasDisponibles() >= 1) {
             Entrada entrada = new Entrada(evento.getCodigo(), evento, cliente);
             evento.setListadoEntradas(entrada);
-            evento.setEntradasDisponibles(evento.getEntradasDisponibles()-1);
         } else {
             evento.setListadoEsperaClientes(cliente);
         }
@@ -784,7 +782,47 @@ public class Sistema implements IObligatorio {
     // 2.10
     @Override
     public Retorno comprasXDia(int mes) {
-        return Retorno.noImplementada();
+        
+        if (mes < 1 || mes > 12) {
+            return Retorno.error1();
+        }
+
+        if (listaEventos.esVacia()) {
+            return Retorno.ok();
+        }
+        
+        ListaNodos salasRecorridas = new ListaNodos<>();
+        String resultado = "";
+        for (int i = 0; i < listaEventos.cantidadElementos(); i++) {
+            
+            Evento evento = listaEventos.obtenerElemento(i); 
+            
+            if (evento.getEntradasVendidas() == 0) {
+                continue;
+            }
+            
+            Sala sala = evento.getSala();
+            int indice = 0;
+            LocalDate fecha = sala.getFechaOcupada().obtenerElemento(indice);
+            while (fecha != null) {
+                if (fecha.getMonth().getValue() == mes) {
+                    if (!salasRecorridas.existeElemento(sala)) {
+                        resultado += fecha.getDayOfMonth() + "-" + evento.getEntradasVendidas() + "#";
+                    }
+                }
+                indice++;
+                fecha = sala.getFechaOcupada().obtenerElemento(indice);
+            }
+            
+            salasRecorridas.agregarInicio(sala);
+        }
+        
+        if (!resultado.equals("")) {
+            resultado = resultado.substring(0, resultado.length() - 1);
+        }
+        Retorno r = new Retorno(Retorno.Resultado.OK);
+        r.valorString = resultado;
+        return r;
     }
     
 }

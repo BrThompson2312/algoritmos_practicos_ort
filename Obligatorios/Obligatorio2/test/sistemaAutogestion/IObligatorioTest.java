@@ -754,46 +754,50 @@ public class IObligatorioTest {
     //------- 2.10 -------
     @Test
     public void testCantidadDeComprasPorDia() {
-        // Valores Default
         Retorno ret;
-        LocalDate fecha = LocalDate.of(2025, 5, 10);
+        LocalDate fecha = LocalDate.of(2025, 5, 10);        
+        LocalDate fecha2 = LocalDate.of(2024, 5, 3);
         
-        /* Creamos sala y cliente para el registro de un evento */
-        miSistema.registrarSala("Sala A", 30);        
+        miSistema.registrarSala("Sala A", 30);            
 
-        miSistema.registrarCliente("54936798", "Bruno");
-        miSistema.registrarEvento("4289", "Bienvenidos", 30, fecha);
+        miSistema.registrarCliente("11112222", "Bruno");        
+        miSistema.registrarCliente("22224444", "Bruno");
+        miSistema.registrarCliente("55556666", "Bruno");        
+        miSistema.registrarCliente("77778888", "Bruno");
+        miSistema.registrarCliente("99990000", "Bruno");        
+        miSistema.registrarCliente("99887766", "Bruno");
         
-        ret = miSistema.comprasXDia(2 /*Mes*/);
-        assertEquals(Retorno.Resultado.OK, ret.resultado);
+        miSistema.registrarEvento("1111", "Bienvenidos", 30, fecha);
+        miSistema.registrarEvento("2222", "Bienvenidos", 30, fecha2);
+        
+        miSistema.comprarEntrada("11112222", "1111");        
+        miSistema.comprarEntrada("22224444", "1111");
+        miSistema.comprarEntrada("55556666", "1111");        
+        miSistema.comprarEntrada("77778888", "2222");
+        miSistema.comprarEntrada("99990000", "2222");        
+        miSistema.comprarEntrada("99887766", "2222");
 
-        /* 
-            Nota: Debería de mostrar la cantidad de compras que se realizo en el mes mencionado
-            
-            Formato: 
-            1-10#2-6#4-67#7-5#28-6
-        */
+        ret = miSistema.comprasXDia(5);
+        assertEquals("3-3#10-3", ret.valorString);
     }
     
     @Test
     public void testCantidadDeComprasPorDia_ERROR1() {
-        // Valores Default
         Retorno ret;
         LocalDate fecha = LocalDate.of(2025, 5, 10);
         
-        /* Creamos sala y cliente para el registro de un evento */
-        ret = miSistema.registrarSala("Tango", 30);
-        assertEquals(Retorno.Resultado.OK, ret.resultado);
+        miSistema.registrarSala("Tango", 30);       
+        miSistema.registrarSala("Jazz", 30);
 
-        ret = miSistema.registrarCliente("54936798", "Bruno");
-        assertEquals(Retorno.Resultado.OK, ret.resultado);
+        miSistema.registrarCliente("11112222", "Bruno");
 
-        ret = miSistema.registrarEvento("4289", "Tango", 30, fecha);
-        assertEquals(Retorno.Resultado.OK, ret.resultado);
+        miSistema.registrarEvento("4289", "Bienvenidos", 30, fecha);           
+        miSistema.registrarEvento("4289", "Bienvenidos", 30, fecha);        
+        
+        miSistema.comprarEntrada("11112222", "4289");
         
         /* ERROR 1 : Mes < 1 o Mes > 12 */
         ret = miSistema.comprasXDia(0 /*Mes*/);
         assertEquals(Retorno.Resultado.ERROR_1, ret.resultado);
     }
-    
 }
