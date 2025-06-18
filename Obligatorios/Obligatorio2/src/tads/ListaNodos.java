@@ -22,8 +22,9 @@ public class ListaNodos<T extends Comparable> implements IListaSimple<T> {
         } else {
             nuevo.setSiguiente(inicio);
             inicio = nuevo;
-            cantElementos++;
         }
+        
+        cantElementos++;
     }
 
     @Override

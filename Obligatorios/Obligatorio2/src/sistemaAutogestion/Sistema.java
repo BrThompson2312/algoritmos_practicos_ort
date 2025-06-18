@@ -7,7 +7,6 @@ import dominio.Entrada;
 import dominio.Calificacion;
 import java.time.LocalDate;
 import tads.ListaNodos;
-import tads.Nodo;
 
 public class Sistema implements IObligatorio {
     
@@ -18,9 +17,9 @@ public class Sistema implements IObligatorio {
     // 1.1
     @Override
     public Retorno crearSistemaDeGestion() {
-        this.listaEventos = new ListaNodos<Evento>();
-        this.listaClientes = new ListaNodos<Cliente>();
-        this.listaSalas = new ListaNodos<Sala>();
+        this.listaEventos = new ListaNodos<>();
+        this.listaClientes = new ListaNodos<>();
+        this.listaSalas = new ListaNodos<>();
         return Retorno.ok("Si pudo inicializar el sistema correctamente.");
     }
     
@@ -73,117 +72,66 @@ public class Sistema implements IObligatorio {
         }
         
         Evento auxEvento = new Evento(codigo);
-        
         if (listaEventos.existeElemento(auxEvento)) {
             return Retorno.error1();
         }
             
-        if (!listaSalas.esVacia()) {
+        if (listaSalas.esVacia()) {
+            return Retorno.error3();
+        }
+        
+        int indiceActual = 0;
+        Sala auxSala = listaSalas.obtenerElemento(indiceActual);
+        boolean encontrado = false;
+
+        while (auxSala != null && !encontrado) {
             
-            int indiceActual = 0;
-            Sala auxSala = listaSalas.obtenerElemento(indiceActual);
-            boolean encontrado = false;
-
-            while (auxSala != null && !encontrado) {
-                if (auxSala.getCapacidad() >= aforoNecesario) {
-
-                    if (auxSala.getFechaOcupada().esVacia()) {
-                        
-                        auxSala.setFechaOcupada(fecha);
-                        encontrado = true;
-                        
-                    } else {
-                        
-                        Nodo auxNodoFecha = auxSala.getFechaOcupada().getInicio();
-                        LocalDate auxFecha = (LocalDate)auxNodoFecha.getDato();
-                        
-                        while (auxNodoFecha != null && !encontrado) {
-                            if (
-                                auxFecha == fecha
-                                && auxFecha.getDayOfMonth() >= 1 && auxFecha.getDayOfMonth() <= 30
-                                && auxFecha.getMonthValue() >= 1 && auxFecha.getMonthValue() <= 12
-                            ){
-                                auxSala.setFechaOcupada(fecha);
-                                encontrado = true;
-                            } else {
-                                auxNodoFecha = auxNodoFecha.getSiguiente();
-                            }
-                        }
-                        
-                        if (!encontrado) {
-                            auxSala = listaSalas.obtenerElemento(++indiceActual);
+            if (auxSala.getCapacidad() >= aforoNecesario) {
+                
+                if (auxSala.getFechaOcupada().esVacia()) {
+                    
+                    auxSala.setFechaOcupada(fecha);
+                    encontrado = true;
+                    
+                } else {
+                    
+                    int indiceFecha = 0;
+                    LocalDate auxFechaOcupada = auxSala.getFechaOcupada().obtenerElemento(indiceFecha);
+                    boolean finalizado = false;
+                    
+                    while (auxFechaOcupada != null && !finalizado) {
+                        if (auxFechaOcupada.equals(fecha)) {
+                            finalizado = true;
+                        } else {
+                            auxFechaOcupada = auxSala.getFechaOcupada().obtenerElemento(indiceFecha++);
                         }
                     }
                     
-                } else {
-                    auxSala = listaSalas.obtenerElemento(++indiceActual);
+                    if (!finalizado) {
+                        auxSala.setFechaOcupada(fecha);
+                        encontrado = true;
+                    } else {
+                        indiceActual++;
+                        auxSala = listaSalas.obtenerElemento(indiceActual);
+                    }
+                    
                 }
-            }
-
-            if (encontrado) {
-                auxEvento.setEntradasDisponibles(aforoNecesario);
-                auxEvento.setDescripcion(descripcion);
-                auxEvento.setSala(auxSala);
-                listaEventos.agregarInicio(auxEvento);
-                return Retorno.ok("Si pudo registrar el evento");
+                
             } else {
-                return Retorno.error3();
+                indiceActual++;
+                auxSala = listaSalas.obtenerElemento(indiceActual);
             }
             
+        }
+
+        if (encontrado) {
+            Evento evento = new Evento(codigo, descripcion, auxSala, aforoNecesario);
+            listaEventos.agregarInicio(evento);
+            return Retorno.ok("Si pudo registrar el evento");
         } else {
             return Retorno.error3();
         }
-    }
-
-    // 1.45
-    public Retorno registrarEvento2(String codigo, String descripcion, int aforoNecesario, LocalDate fecha) {
         
-        if (aforoNecesario <= 0) {
-            return Retorno.error2();
-        }
-        
-        Evento auxEvento = new Evento(codigo);
-        if (listaEventos.existeElemento(auxEvento)) {
-            return Retorno.error1();
-        }
-            
-        if (!listaSalas.esVacia()) {
-            
-            int indiceActual = 0;
-            Sala auxSala = listaSalas.obtenerElemento(indiceActual);
-            boolean encontrado = false;
-            
-            while (auxSala != null && !encontrado) {
-                if (auxSala.getCapacidad() >= aforoNecesario && !auxSala.getFechaOcupada().esVacia()) {
-                    int indiceFecha = 0;
-                    while (auxSala.getFechaOcupada().obtenerElemento(indiceFecha) != null && !encontrado) {
-                        if (auxSala.getFechaOcupada().obtenerElemento(indiceFecha).equals(fecha)) {
-                            encontrado = true;
-                        } else {
-                            indiceFecha++;
-                        }
-                    }
-                    if (!encontrado) {
-                        auxSala = listaSalas.obtenerElemento(indiceActual++);
-                    }
-                } else {
-                    auxSala = listaSalas.obtenerElemento(indiceActual++);
-                }
-            }
-
-            if (encontrado) {
-                auxEvento.setEntradasDisponibles(aforoNecesario);
-                auxEvento.setDescripcion(descripcion);
-                auxEvento.setSala(auxSala);
-                listaEventos.agregarInicio(auxEvento);
-                return Retorno.ok("Si pudo registrar el evento");
-            } else {
-                return Retorno.error3();
-            }
-            
-        } else {
-            return Retorno.error3();
-        }
     }
     
     // 1.5
@@ -207,61 +155,6 @@ public class Sistema implements IObligatorio {
     // 1.6
     @Override
     public Retorno comprarEntrada(String cedula, String codigoEvento) {
-        
-        Cliente cliente = null;
-        
-        for (int i = 0; i <= listaClientes.cantidadElementos(); i++) {
-            Cliente c = listaClientes.obtenerElemento(i);
-            if (c.getCedula().equals(cedula)) {
-                cliente = c;
-            }
-        }
-        if (cliente == null) {
-            return Retorno.error1();
-        }
-
-        Evento evento = null;
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
-            Evento e = listaEventos.obtenerElemento(i);
-            if (e.getCodigo().equals(codigoEvento)) {
-                evento = e;
-            }
-        }
-        if (evento == null) {
-            return Retorno.error2();
-        }
-
-        //verifico si ya tiene entrada
-        ListaNodos<Entrada> entradas = evento.getListadoEntradas();
-        for (int i = 0; i <= entradas.cantidadElementos(); i++) {
-            Entrada en = entradas.obtenerElemento(i);
-            if (en.getEntradaCliente().getCedula().equals(cedula)) {
-                return Retorno.error3();
-            }
-        }
-
-        // hay lugar?
-        if (evento.getEntradasVendidas() < evento.getSala().getCapacidad()) {
-            String codigoEntrada = "E" + (evento.getEntradasVendidas() + 1);
-            Entrada nuevaEntrada = new Entrada(codigoEntrada, evento, cliente);
-            evento.getListadoEntradas().agregarInicio(nuevaEntrada);
-            evento.setEntradasVendidas(evento.getEntradasVendidas() + 1);
-            evento.setEntradasDisponibles(evento.getSala().getCapacidad() - evento.getEntradasVendidas());
-            return Retorno.ok("Entrada comprada con exito");
-        } else {
-            ListaNodos<Cliente> espera = evento.getListadoEsperaClientes();
-            for (int i = 0; i <= espera.cantidadElementos(); i++) {
-                Cliente c = espera.obtenerElemento(i);
-                if (c.getCedula().equals(cedula)) {
-                    return Retorno.error4();
-                }
-            }
-            espera.agregarInicio(cliente);
-            return Retorno.ok("Agregado a lista de espera");
-        }
-    }
-    
-    public Retorno comprarEntrada2(String cedula, String codigoEvento) {
         
         int indice = 0;
         Cliente cliente = listaClientes.obtenerElemento(indice);
@@ -312,10 +205,15 @@ public class Sistema implements IObligatorio {
     @Override
     public Retorno eliminarEvento(String codigo) {
         Evento evento = null;
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
+        boolean terminado = false;
+        for (int i = 0; i <= listaEventos.cantidadElementos() && !terminado; i++) {
             Evento e = listaEventos.obtenerElemento(i);
-            if (e.getCodigo().equals(codigo)) {
-                evento = e;
+            if (e != null) {
+                if (e.getCodigo().equals(codigo)) {
+                    evento = e;
+                }
+            } else {
+                terminado = true;
             }
         } 
         if (evento == null) {
@@ -337,10 +235,15 @@ public class Sistema implements IObligatorio {
     @Override
     public Retorno devolverEntrada(String cedula, String codigoEvento) {
         Cliente cliente = null;
-        for (int i = 0; i <= listaClientes.cantidadElementos(); i++) {
+        boolean terminado = false;
+        for (int i = 0; i <= listaClientes.cantidadElementos() && !terminado; i++) {
             Cliente c = listaClientes.obtenerElemento(i);
-            if (c.getCedula().equals(cedula)) {
-                cliente = c;
+            if (c != null) {
+                if (c.getCedula().equals(cedula)) {
+                    cliente = c;
+                }
+            } else {
+                terminado = true;
             }
         }
         if (cliente == null) {
@@ -348,75 +251,15 @@ public class Sistema implements IObligatorio {
         }
 
         Evento evento = null;
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
+        terminado = false;
+        for (int i = 0; i <= listaEventos.cantidadElementos() && !terminado; i++) {
             Evento e = listaEventos.obtenerElemento(i);
-            if (e.getCodigo().equals(codigoEvento)) {
-                evento = e;
-            }
-        }
-        if (evento == null) {
-            return Retorno.error2();
-        }
-
-        //El cliente tiene entrada?
-        ListaNodos<Entrada> entradas = evento.getListadoEntradas();
-        Entrada entradaADevolver = null;
-
-        for (int i = 0; i <= entradas.cantidadElementos(); i++) {
-            Entrada entrada = entradas.obtenerElemento(i);
-            if (entrada.getEntradaCliente().getCedula().equals(cedula)&& entrada.estaActiva()) {
-                entradaADevolver = entrada;
-                
-            }
-        }
-
-        if (entradaADevolver == null) {
-            return Retorno.error3();
-        }
-
-     
-       entradaADevolver.setActiva(false);
-       
-       
-
-        evento.setEntradasVendidas(evento.getEntradasVendidas() - 1);
-        evento.setEntradasDisponibles(evento.getEntradasDisponibles() + 1);
-
-        // ahora voy a revisar si hay cliente en lista de espera, si hay le asigno la entrada que se devolvio
-        ListaNodos<Cliente> espera = evento.getListadoEsperaClientes();
-        if (!espera.esVacia()) {
-            Cliente clienteEnEspera = espera.obtenerElemento(0);
-            espera.eliminarElemento(clienteEnEspera);
-
-            String nuevoCodigoEntrada = "E" + (evento.getEntradasVendidas() + 1);
-            Entrada nuevaEntrada = new Entrada(nuevoCodigoEntrada, evento, clienteEnEspera);
-            evento.getListadoEntradas().agregarInicio(nuevaEntrada);
-            nuevaEntrada.setActiva(true);
-            entradas.agregarFinal(nuevaEntrada);
-            
-            evento.setEntradasVendidas(evento.getEntradasVendidas() + 1);
-            evento.setEntradasDisponibles(evento.getEntradasDisponibles() - 1);
-        }
-        return Retorno.ok("Entrada devuelta correctamente");
-    }
-
-    public Retorno devolverEntrada2(String cedula, String codigoEvento) {
-        Cliente cliente = null;
-        for (int i = 0; i <= listaClientes.cantidadElementos(); i++) {
-            Cliente c = listaClientes.obtenerElemento(i);
-            if (c.getCedula().equals(cedula)) {
-                cliente = c;
-            }
-        }
-        if (cliente == null) {
-            return Retorno.error1();
-        }
-
-        Evento evento = null;
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
-            Evento e = listaEventos.obtenerElemento(i);
-            if (e.getCodigo().equals(codigoEvento)) {
-                evento = e;
+            if (e != null) {
+                if (e.getCodigo().equals(codigoEvento)) {
+                    evento = e;
+                } 
+            } else {
+                terminado = true;
             }
         }
         if (evento == null) {
@@ -451,48 +294,6 @@ public class Sistema implements IObligatorio {
     // 1.9
     @Override
     public Retorno calificarEvento(String cedula, String codigoEvento, int puntaje, String comentario) {
-        
-        if (puntaje < 1 || puntaje > 10) {
-            return Retorno.error3();
-        }
-        
-        Cliente cliente = null;
-        for (int i = 0; i <= listaClientes.cantidadElementos(); i++) {
-            Cliente c = listaClientes.obtenerElemento(i);
-            if (c.getCedula().equals(cedula)) {
-                cliente = c;
-            }
-        }
-        if (cliente == null) {
-            return Retorno.error1();
-        }
-        
-        Evento evento = null;
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
-            Evento e = listaEventos.obtenerElemento(i);
-            if (e.getCodigo().equals(codigoEvento)) {
-                evento = e;
-            }
-        } 
-        if (evento == null) {
-            return Retorno.error1();
-        }
-        
-        // tengo que ver si el cliente ya califico el evento
-        
-        for (int i =0; i <= evento.getCalificaciones().cantidadElementos(); i++) {
-            Calificacion cal = evento.getCalificaciones().obtenerElemento(i);
-            if (cal.getCliente().getCedula().equals(cedula)) {
-                return Retorno.error4();
-            }
-        }
-        
-        Calificacion nueva = new Calificacion(cliente, puntaje, comentario);
-        evento.getCalificaciones().agregarInicio(nueva);
-        return Retorno.ok("Se califico el evento");
-    }
-    
-    public Retorno calificarEvento2(String cedula, String codigoEvento, int puntaje, String comentario) {
         
         if (listaEventos.esVacia()) {
             return Retorno.error2();
@@ -562,80 +363,69 @@ public class Sistema implements IObligatorio {
     // 2.1
     @Override
     public Retorno listarSalas() {
-        Retorno r = new Retorno(Retorno.Resultado.OK);
-        
         String texto = "";
-        for (int i = listaSalas.cantidadElementos(); i >= 0; i--) {
-            Sala s = listaSalas.obtenerElemento(i);
-            texto += s.toString() + "#";
+
+        int indice = listaSalas.cantidadElementos()-1;
+        Sala sala = listaSalas.obtenerElemento(indice);
+        while (sala != null) {
+            texto += sala.toString() + "#";
+            indice--;
+            sala = listaSalas.obtenerElemento(indice);
         }
         
-        // Elimino ultimo "#"
         texto = texto.substring(0, texto.length() - 1);
         
+        Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = texto;
-        
         return r;
     }
 
     // 2.2
     @Override
     public Retorno listarEventos() {
-        Retorno r = new Retorno(Retorno.Resultado.OK);
         
         String texto = "";
         ListaNodos<Evento> auxListaEventos = new ListaNodos<Evento>();
 
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
-            Evento auxEvento = listaEventos.obtenerElemento(i);
-            auxListaEventos.agregarOrdenado(auxEvento);
+        int indice = 0;
+        while (listaEventos.obtenerElemento(indice) != null) {
+            auxListaEventos.agregarOrdenado(listaEventos.obtenerElemento(indice));
+            indice++;
         }
         
-        for (int i = 0; i <= auxListaEventos.cantidadElementos(); i++) {
-            Evento auxEvento = auxListaEventos.obtenerElemento(i);
-            texto += auxEvento.toString() + "#";
+        indice = 0;
+        while (auxListaEventos.obtenerElemento(indice) != null) {
+            texto += auxListaEventos.obtenerElemento(indice).toString() + "#";
+            indice++;
         }
         
-//        int indice = 0;
-//        while (listaEventos.obtenerElemento(indice) != null) {
-//            auxListaEventos.agregarOrdenado(listaEventos.obtenerElemento(indice));
-//            indice++;
-//        }
-//        
-//        indice = 0;
-//        while (auxListaEventos.obtenerElemento(indice) != null) {
-//            texto += auxListaEventos.obtenerElemento(indice).toString() + "#";
-//            indice++;
-//        }
-        
+        Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = texto;
-        
         return r;
     }
 
     // 2.3
     @Override
     public Retorno listarClientes() {
-        Retorno r = new Retorno(Retorno.Resultado.OK);
-        
-        ListaNodos<Cliente> auxListaClientes = new ListaNodos<Cliente>();
-        
-        for (int i = 0; i <= listaClientes.cantidadElementos(); i++) {
-            Cliente auxCliente = listaClientes.obtenerElemento(i);
-            auxListaClientes.agregarOrdenado(auxCliente);
-        }
         
         String texto = "";
-        for (int i = 0; i <= auxListaClientes.cantidadElementos(); i++) {
-            Cliente auxCliente = auxListaClientes.obtenerElemento(i);
-            texto += auxCliente.toString() + "#";
+        ListaNodos<Cliente> auxListaClientes = new ListaNodos<Cliente>();
+        
+        int indice = 0;
+        while (listaClientes.obtenerElemento(indice) != null) {
+            auxListaClientes.agregarOrdenado(listaClientes.obtenerElemento(indice));
+            indice++;
         }
         
-        // Elimino ultimo "#"
+        indice = 0;
+        while (auxListaClientes.obtenerElemento(indice) != null) {
+            texto += auxListaClientes.obtenerElemento(indice).toString() + "#";
+            indice++;
+        }
+        
         texto = texto.substring(0, texto.length() - 1);
-        
+        Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = texto;
-        
         return r;
     }
 
@@ -696,10 +486,15 @@ public class Sistema implements IObligatorio {
             return Retorno.error1();
         }
         Evento evento = null;
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
+        boolean terminado = false;
+        for (int i = 0; i <= listaEventos.cantidadElementos() && !terminado; i++) {
             Evento e = listaEventos.obtenerElemento(i);
-            if (e.getCodigo().equals(codigo)) {
-                evento = e;
+            if (e != null) {
+                if (e.getCodigo().equals(codigo)) {
+                    evento = e;
+                }
+            } else {
+                terminado = true;
             }
         }
         if (evento == null) {
@@ -707,29 +502,23 @@ public class Sistema implements IObligatorio {
         }
 
         ListaNodos<Entrada> entradas = evento.getListadoEntradas();
-        int cantidadEntradas = entradas.cantidadElementos();
-
-        if (cantidadEntradas == 0) {
-            return Retorno.ok("");
-        }
-
-        int inicio = cantidadEntradas - n;
-        if (inicio < 0) {
-            inicio = 0;
-        }
-
+        
         String resultado = "";
-        for (int i = inicio; i < cantidadEntradas; i++) {
+        terminado = false;
+        for (int i = 0; i < n && !terminado; i++) {
             Entrada entrada = entradas.obtenerElemento(i);
-            Cliente cliente = entrada.getEntradaCliente();
-            String clienteStr = cliente.getCedula() + "-" + cliente.getNombre();
+            if (entrada != null) {
+                Cliente cliente = entrada.getEntradaCliente();
+                String clienteStr = cliente.getCedula() + "-" + cliente.getNombre();
 
-            if (resultado.equals("")) {
-                resultado = clienteStr;
+                if (resultado.equals("")) {
+                    resultado = clienteStr;
+                } else {
+                    resultado = resultado + "#" + clienteStr;
+                }
             } else {
-                resultado = resultado + "#" + clienteStr;
+                terminado = true;
             }
-
         }
         
         Retorno r = new Retorno(Retorno.Resultado.OK);
@@ -742,33 +531,38 @@ public class Sistema implements IObligatorio {
     public Retorno listarEsperaEvento() {
         ListaNodos<Evento> eventosConEspera = new ListaNodos<>();
 
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
+        boolean terminado = false;
+        for (int i = 0; i < listaEventos.cantidadElementos() && !terminado; i++) {
             Evento evento = listaEventos.obtenerElemento(i);
-            if (!evento.getListadoEsperaClientes().esVacia()) {
-                eventosConEspera.agregarOrdenado(evento);
+            if (evento != null) {
+                if (!evento.getListadoEsperaClientes().esVacia()) {
+                    eventosConEspera.agregarOrdenado(evento);
+                }
+            } else {
+                terminado = true;
             }
         }
-        if (eventosConEspera.esVacia()) {
-            return Retorno.error1();
-        }
+        
         String resultado = "";
-        for (int i = 0; i <= eventosConEspera.cantidadElementos(); i++) {
+        for (int i = 0; i < eventosConEspera.cantidadElementos(); i++) {
             Evento evento = eventosConEspera.obtenerElemento(i);
             resultado += evento.getCodigo() + "-";
 
             ListaNodos<Cliente> clientesOrdenados = new ListaNodos<>();
 
             ListaNodos<Cliente> espera = evento.getListadoEsperaClientes();
-            for (int k = 0; k <= espera.cantidadElementos(); k++) {
+            for (int k = 0; k < espera.cantidadElementos(); k++) {
                 clientesOrdenados.agregarOrdenado(espera.obtenerElemento(k));
             }
-            for (int k = 0; k <= clientesOrdenados.cantidadElementos(); k++) {
+            for (int k = 0; k < clientesOrdenados.cantidadElementos(); k++) {
                 resultado += clientesOrdenados.obtenerElemento(k).getCedula();
                 if (k < clientesOrdenados.cantidadElementos() - 1) {
                     resultado += "-";
                 }
             }
+            resultado += "#";
         }
+        resultado = resultado.substring(0, resultado.length() - 1);
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = resultado;
         return r;
@@ -776,26 +570,35 @@ public class Sistema implements IObligatorio {
  
     // 2.7
     @Override
-    public Retorno deshacerUtimasCompras(int n) {
+    public Retorno deshacerUltimasCompras(int n) {
+        
         ListaNodos<Entrada> entradasADeshacer = new ListaNodos<>();
         
         //busco entradas activas
-        for (int i = listaEventos.cantidadElementos()-1; i>= 0 && entradasADeshacer.cantidadElementos() < n; i++){
+        for (int i = listaEventos.cantidadElementos()-1; i >= 0 && entradasADeshacer.cantidadElementos() < n; i++){
             Evento evento = listaEventos.obtenerElemento(i);
-            ListaNodos<Entrada> entradas = evento.getListadoEntradas();
+            if (evento != null) {
+                ListaNodos<Entrada> entradas = evento.getListadoEntradas();
         
-            for (int j = entradas.cantidadElementos() -1; j >= 0 && entradasADeshacer.cantidadElementos() < n; j++){
-                Entrada entrada = entradas.obtenerElemento(j);
-                if (entrada.estaActiva()) {
-                    entradasADeshacer.agregarFinal(entrada);
+                for (int j = entradas.cantidadElementos() -1; j >= 0 && entradasADeshacer.cantidadElementos() < n; j++){
+                    Entrada entrada = entradas.obtenerElemento(j);
+                    if (entrada != null) {
+                        if (entrada.estaActiva()) {
+                            entradasADeshacer.agregarFinal(entrada);
+                        } else {
+                            break;
+                        }
+                    }
                 }
+            } else {
+                break;
             }
         }
         
         // desactiva y muestra
         ListaNodos <String> descripciones = new ListaNodos<>();
         
-        for (int i =0; i < entradasADeshacer.cantidadElementos(); i++){
+        for (int i = 0; i < entradasADeshacer.cantidadElementos(); i++){
             Entrada entrada = entradasADeshacer.obtenerElemento(i);
             entrada.setActiva(false);
 
@@ -803,12 +606,78 @@ public class Sistema implements IObligatorio {
             descripciones.agregarOrdenado(descripcion);
         }
         String resultado ="";
-        for (int i =0; i < descripciones.cantidadElementos(); i++){
+        for (int i = 0; i < descripciones.cantidadElementos(); i++){
             resultado += descripciones.obtenerElemento(i) + "#";
         }
-        return Retorno.ok(resultado);
+        
+        resultado = resultado.substring(0, resultado.length() - 1);
+        Retorno r = new Retorno(Retorno.Resultado.OK);
+        r.valorString = resultado;
+        return r;
     }
 
+    public Retorno deshacerUltimasCompras2(int n) {
+        
+        if (listaEventos.esVacia() || n < 0) {
+            return Retorno.ok();
+        }
+        
+        int indice = 0;
+        Evento evento = listaEventos.obtenerElemento(indice);
+        
+        String resultado = "";
+        
+        ListaNodos<Entrada> listadoEntradas = new ListaNodos<>();
+        
+        int cantVueltas = 0;
+        while (evento != null) {
+            
+            // Verificamos si hay clientes en lista de espera. Si lo hay, deshacemos las compras de ESA lista
+            if (!evento.getListadoEsperaClientes().esVacia()) {
+                
+                evento.getListadoEsperaClientes().eliminarInicio();
+                cantVueltas++;
+                
+            } else { // Si no, entonces deshacemos desde la lista original
+                
+                evento.setEntradasDisponibles(evento.getEntradasDisponibles()+1);
+                listadoEntradas.agregarInicio(evento.getListadoEntradas().getInicio().getDato());
+                evento.getListadoEntradas().eliminarInicio();
+                cantVueltas++;
+                
+            }
+            
+            if (cantVueltas == n) {
+                cantVueltas = 0;
+                indice++;
+                evento = listaEventos.obtenerElemento(indice);
+            }
+        }
+        
+        ListaNodos<Entrada> listadoEntradasOrdenadas = new ListaNodos<>();
+        
+        int indice2 = 0;
+        Entrada auxEntrada = listadoEntradas.obtenerElemento(indice2);
+        while (auxEntrada != null) {
+            listadoEntradasOrdenadas.agregarOrdenado(auxEntrada);
+            indice2++;
+            auxEntrada = listadoEntradas.obtenerElemento(indice2);
+        }
+        
+        indice2 = 0;
+        auxEntrada = listadoEntradasOrdenadas.obtenerElemento(indice2);
+        while (auxEntrada != null) {
+            resultado += auxEntrada + "#";
+            indice2++;
+            auxEntrada = listadoEntradas.obtenerElemento(indice2);
+        }
+        
+        resultado = resultado.substring(0, resultado.length() - 1);
+        Retorno r = new Retorno(Retorno.Resultado.OK);
+        r.valorString = resultado;
+        return r;
+    }
+    
     // 2.8
     @Override
     public Retorno eventoMejorPuntuado() {
@@ -816,7 +685,7 @@ public class Sistema implements IObligatorio {
         ListaNodos<Evento> eventosCalificados = new ListaNodos<>();
         double mejorPromedio = 0;
 
-        for (int i = 0; i <= listaEventos.cantidadElementos(); i++) {
+        for (int i = 0; i < listaEventos.cantidadElementos(); i++) {
             Evento e = listaEventos.obtenerElemento(i);
             ListaNodos<Calificacion> calificaciones = e.getCalificaciones();
 
@@ -824,7 +693,7 @@ public class Sistema implements IObligatorio {
                 int totalPuntaje = 0;
                 int cantidad = 0;
 
-                for (int h = 0; h <= calificaciones.cantidadElementos(); h++) {
+                for (int h = 0; h < calificaciones.cantidadElementos(); h++) {
                     Calificacion c = calificaciones.obtenerElemento(h);
                     totalPuntaje += c.getPuntaje();
                     cantidad++;
@@ -842,15 +711,16 @@ public class Sistema implements IObligatorio {
         }
 
         ListaNodos <Evento> ordenados = new ListaNodos<>();
-        for (int i =0; i <= eventosCalificados.cantidadElementos(); i++){
+        for (int i = 0; i < eventosCalificados.cantidadElementos(); i++){
             ordenados.agregarOrdenado(eventosCalificados.obtenerElemento(i));
         }
         
-        String resultado ="";
-        for (int i =0; i <= ordenados.cantidadElementos(); i++) {
+        String resultado = "";
+        for (int i = 0; i < ordenados.cantidadElementos(); i++) {
             Evento e = ordenados.obtenerElemento(i);
             resultado += e.getCodigo() + "-" + (e.getPromedioPuntaje());
         }
+        
         Retorno r = new Retorno(Retorno.Resultado.OK);
         r.valorString = resultado;
         return r;

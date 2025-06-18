@@ -1,5 +1,0 @@
-· Registrar evento NO esta guardando en memoria las entradas disponibles y NO disponibles.
-
-· Metodo devolverEntrada() puede que no este devolviendo entrada y asignando la misma a otro cliente
-
-· 

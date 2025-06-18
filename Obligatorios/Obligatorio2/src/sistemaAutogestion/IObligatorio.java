@@ -44,7 +44,7 @@ public interface IObligatorio {
    
    public Retorno listarEsperaEvento();
    
-   public Retorno deshacerUtimasCompras(int n);
+   public Retorno deshacerUltimasCompras(int n);
 
    public Retorno eventoMejorPuntuado();
  

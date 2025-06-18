@@ -51,4 +51,10 @@ public class Entrada implements Comparable<Entrada>
     public int compareTo(Entrada o) {
         return this.codigo.compareTo(o.codigo);
     }
+    
+    @Override
+    public String toString() {
+        return this.entradaEvento.getCodigo() + "-" + this.entradaCliente.getCedula();
+    }
+    
 }
